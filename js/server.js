@@ -1,128 +1,142 @@
 // js/server.js - Client-Side Network Bridge
-// This script enables real-time communication between the browser (client) and the Node.js server.
 
-let socket = null;
-// ⚠️ CRITICAL: Replace with your actual deployed server URL when running online.
-// For local testing, use 'http://localhost:3000' if your Node.js server is running on that port.
+// 🛑 STEP 1: CRITICALLY IMPORTANT! REPLACE THIS WITH YOUR LIVE RENDER URL!
+// Example: const SERVER_URL = 'https://umg-multiplayer-server.onrender.com';
 const SERVER_URL = 'https://umg-game-server.onrender.com'; 
 
-// --- 1. CORE CONNECTION ---
+// Initialize Socket.IO connection
+const socket = io(SERVER_URL, {
+    // Add a small timeout setting for debugging (though not strictly required)
+    timeout: 10000 
+});
 
-/**
- * Establishes the WebSocket connection using Socket.IO.
- * Sets up listeners for core events like state updates and chat messages.
- */
-function connectSocket() {
-    if (socket && socket.connected) return socket;
-    
-    // Connect to the Node.js server
-    socket = io(SERVER_URL);
-    
-    socket.on('connect', () => {
-        console.log('Connected to server successfully.');
-    });
-
-    socket.on('connect_error', (err) => {
-        console.error('Connection Error:', err.message);
-        // logMessage is a function assumed to be in server-game.html
-        if (typeof window.logMessage === 'function') {
-            window.logMessage('Connection failed. Server might be offline or URL is wrong.', 'error');
-        }
-    });
-
-    // --- 2. GAME LOBBY LISTENERS (Used by server-pick.html) ---
-    
-    // Server sends the list of available games
-    socket.on('serverList', (servers) => {
-        // displayServers is a function defined in server-pick.html
-        if (typeof window.displayServers === 'function') {
-            window.displayServers(servers);
-        }
-    });
-
-    // --- 3. GAME ROOM LISTENERS (Used by server-game.html) ---
-
-    // Initial state received right after joining a game room
-    socket.on('initialState', (state) => {
-        console.log('Received initial game state.');
-        // updateGameState is a function defined in server-game.html
-        if (typeof window.updateGameState === 'function') {
-            window.updateGameState(state);
-        }
-    });
-
-    // Full state update from the server after any player action
-    socket.on('stateUpdate', (newState) => {
-        console.log('Received state update from server.');
-        if (typeof window.updateGameState === 'function') {
-            window.updateGameState(newState);
-        }
-    });
-
-    // Handle global chat messages
-    socket.on('globalChat', (message, type = 'system') => {
-        if (typeof window.logMessage === 'function') {
-            window.logMessage(message, type);
-        }
-    });
-    
-    // Handle join failures
-    socket.on('joinFailed', (message) => {
-        alert('Failed to join server: ' + message);
-        // Redirect back to server list on failure
-        window.location.href = 'server-pick.html'; 
-    });
-
-    return socket;
+// --- Utility Functions ---
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
 }
 
-// --- 4. EXPORTED FUNCTIONS CALLED BY HTML FILES ---
+const serverID = getQueryParam('server');
+// Use a generic placeholder name for joining since the client will update it later
+const initialJoinData = {
+    serverID: serverID,
+    password: '', 
+    hostName: 'GitHub Player' 
+};
+// ----------------------------
 
-/**
- * Called by server-pick.html (Refresh button). Requests the server list.
- */
-window.requestServerList = function() {
-    connectSocket().emit('requestServerList');
-}
+// --- SOCKET EVENT HANDLERS ---
 
-/**
- * Called by server-pick.html (Join button). Attempts to join a specific server.
- */
-window.joinServerNetwork = function(serverID, password) {
-    connectSocket().emit('joinServer', { serverID, password });
-}
+// Event fired when the HTTP handshake fails or the server rejects the connection
+socket.on('connect_error', (err) => {
+    const errorReason = err.message || 'Unknown network error.'; 
+    console.error("Socket.IO Connection Failed:", err);
+    
+    // Use the global function defined in server-game.html to display the error
+    if (window.addChatMessage) {
+        window.addChatMessage('System', `CONNECTION FAILED! Reason: ${errorReason}. Check console for details.`, true);
+    }
+    
+    // Update the UI status to show definite failure
+    const statusEl = document.getElementById('connectionStatus');
+    if (statusEl) {
+        statusEl.classList.remove('connected');
+        statusEl.classList.add('disconnected');
+        statusEl.querySelector('span:last-child').textContent = 'Disconnected: Error';
+    }
+});
 
-/**
- * Called by server-create.html (Create button). Sends new server configuration to backend.
- */
-window.createServerOnNetwork = function(serverData) {
-    connectSocket().emit('createServer', serverData);
-}
+// Event fired if the connection was established but then dropped
+socket.on('disconnect', (reason) => {
+    if (window.addChatMessage) {
+        window.addChatMessage('System', `DISCONNECTED! Reason: ${reason}. Attempting to reconnect...`, true);
+    }
+    
+    const statusEl = document.getElementById('connectionStatus');
+    if (statusEl) {
+        statusEl.classList.remove('connected');
+        statusEl.classList.add('disconnected');
+        statusEl.querySelector('span:last-child').textContent = 'Disconnected';
+    }
+});
 
-/**
- * Called by server-game.html (Action buttons, End Turn). Sends a player action to the server.
- */
-window.sendActionToNetwork = function(actionData) {
-    if (socket && socket.connected) {
-        // actionData example: { type: 'CLAIM_TERRITORY', territoryId: 'T-01' }
-        socket.emit('playerAction', actionData);
+
+socket.on('connect', () => {
+    // 1. Connection to the socket bridge is established.
+    if (window.logMessage) {
+        window.logMessage('Successfully connected to server bridge.', 'system');
+    }
+    
+    // 2. Now, try to join the game room using the ID from the URL
+    if (serverID) {
+        socket.emit('joinServer', initialJoinData);
+        window.logMessage(`Attempting to join server: ${serverID}...`, 'system');
+        
+        // Update UI to show tentative connection status
+        const statusEl = document.getElementById('connectionStatus');
+        if (statusEl) {
+            statusEl.classList.remove('disconnected');
+            statusEl.classList.add('connected');
+            statusEl.querySelector('span:last-child').textContent = 'Connected (Joining...)';
+        }
     } else {
-        window.logMessage('Not connected to server. Action failed.', 'error');
+        window.logMessage('Connected to server bridge, but no server ID provided in URL.', 'system');
     }
-}
+});
 
-/**
- * Called by server-game.html (Chat input). Sends a chat message.
- */
+
+// [1] Initial State from Server (Success)
+socket.on('initialState', (data) => {
+    window.logMessage('Joined server successfully!', 'system');
+    window.handleWelcome(data); // Calls function in js/game-core.js
+    
+    // Final UI update after successful join
+    const statusEl = document.getElementById('connectionStatus');
+    if (statusEl) {
+        statusEl.classList.remove('disconnected');
+        statusEl.classList.add('connected');
+        statusEl.querySelector('span:last-child').textContent = 'Connected';
+    }
+});
+
+// [2] State Updates
+socket.on('stateUpdate', (newState) => {
+    window.updateGameState(newState); // Calls function in js/game-core.js
+});
+
+// [3] Global Chat
+socket.on('globalChat', (text, type) => {
+    window.logMessage(text, type); // Calls function in js/game-core.js
+});
+
+// [4] Join Failed
+socket.on('joinFailed', (reason) => {
+    window.logMessage(`Join failed: ${reason}`, 'error');
+    
+    // Set UI back to disconnected state
+    const statusEl = document.getElementById('connectionStatus');
+    if (statusEl) {
+        statusEl.classList.remove('connected');
+        statusEl.classList.add('disconnected');
+        statusEl.querySelector('span:last-child').textContent = `Join Failed`;
+    }
+});
+
+
+// --- EXPORTED FUNCTIONS (for actions) ---
+
 window.sendChatMessageToNetwork = function(message) {
-    if (socket && socket.connected) {
-        socket.emit('chatMessage', message);
-    }
-}
+    socket.emit('chatMessage', message);
+};
 
-/**
- * Called by server-game.html on load to ensure connection is open.
- */
-window.initMultiplayerConnection = function() {
-    connectSocket();
-}
+window.sendActionToNetwork = function(action) {
+    socket.emit('playerAction', action);
+};
+
+window.requestServerList = function() {
+    socket.emit('requestServerList');
+};
+
+window.createServer = function(data) {
+    socket.emit('createServer', data);
+};
