@@ -2,7 +2,7 @@
 
 // 🛑 STEP 1: CRITICALLY IMPORTANT! REPLACE THIS WITH YOUR LIVE RENDER URL!
 // Example: const SERVER_URL = 'https://umg-multiplayer-server.onrender.com';
-const SERVER_URL = 'YOUR_RENDER_SERVER_URL_HERE'; 
+const SERVER_URL = 'https://umg-game-server.onrender.com'; 
 
 // Initialize Socket.IO connection
 const socket = io(SERVER_URL, {
