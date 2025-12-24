@@ -1,0 +1,451 @@
+/* ===================================
+   MAIN.CSS - Global Styles
+   Hollow Knight: Silksong Aesthetic
+   =================================== */
+
+/* ==================== RESET & BASE ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Spectral', serif;
+    background: #0a0a0a;
+    color: #f4e4c1;
+    overflow-x: hidden;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="8" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="1"/></svg>'), auto;
+}
+
+/* ==================== TYPOGRAPHY ==================== */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+    margin-bottom: 15px;
+    color: #f4e4c1;
+}
+
+h1 { font-size: 48px; }
+h2 { font-size: 36px; }
+h3 { font-size: 24px; }
+h4 { font-size: 20px; }
+
+p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+small {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* ==================== BUTTONS ==================== */
+.btn {
+    font-family: 'Cinzel', serif;
+    padding: 15px 40px;
+    font-size: 18px;
+    background: transparent;
+    border: 3px solid #8a7a5e;
+    border-radius: 0;
+    color: #f4e4c1;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    box-shadow: 
+        inset 0 0 20px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(138, 122, 94, 0.3);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(244, 228, 193, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    border-color: #f4e4c1;
+    color: #fff;
+    box-shadow: 
+        inset 0 0 30px rgba(244, 228, 193, 0.2),
+        0 0 40px rgba(244, 228, 193, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #5a5a5a;
+}
+
+.btn:disabled:hover {
+    transform: none;
+    border-color: #5a5a5a;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Button Variants */
+.btn-primary {
+    border-color: #8a7a5e;
+}
+
+.btn-success {
+    border-color: #27ae60;
+    color: #27ae60;
+}
+
+.btn-success:hover {
+    border-color: #2ecc71;
+    color: #2ecc71;
+    box-shadow: 
+        inset 0 0 30px rgba(46, 204, 113, 0.2),
+        0 0 40px rgba(46, 204, 113, 0.4);
+}
+
+.btn-danger {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.btn-danger:hover {
+    border-color: #c0392b;
+    color: #c0392b;
+    box-shadow: 
+        inset 0 0 30px rgba(231, 76, 60, 0.2),
+        0 0 40px rgba(231, 76, 60, 0.4);
+}
+
+.btn-secondary {
+    border-color: #95a5a6;
+    color: #95a5a6;
+}
+
+.btn-secondary:hover {
+    border-color: #bdc3c7;
+    color: #bdc3c7;
+}
+
+/* Icon Button */
+.btn-icon {
+    background: transparent;
+    border: 2px solid #8a7a5e;
+    color: #f4e4c1;
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    border-color: #f4e4c1;
+    background: rgba(244, 228, 193, 0.1);
+    transform: scale(1.1);
+}
+
+/* ==================== INPUTS & FORMS ==================== */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #8a7a5e;
+    color: #f4e4c1;
+    font-family: 'Spectral', serif;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #f4e4c1;
+    box-shadow: 0 0 15px rgba(244, 228, 193, 0.3);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #d4c4a8;
+}
+
+.settings-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group.half {
+    flex: 1;
+}
+
+/* Select Styling */
+.select-input {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23f4e4c1" d="M6 9L1 4h10z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+}
+
+/* Checkbox & Toggle */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    background: rgba(138, 122, 94, 0.1);
+    border: 1px solid rgba(138, 122, 94, 0.3);
+    transition: all 0.3s ease;
+}
+
+.checkbox-label:hover {
+    background: rgba(138, 122, 94, 0.2);
+    border-color: rgba(138, 122, 94, 0.5);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+/* Toggle Switch */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding-left: 60px;
+}
+
+.toggle-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 50px;
+    height: 26px;
+    background: rgba(138, 122, 94, 0.3);
+    border: 2px solid #8a7a5e;
+    transition: all 0.3s ease;
+}
+
+.toggle-label::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: #8a7a5e;
+    transition: all 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-label::before {
+    background: rgba(244, 228, 193, 0.3);
+    border-color: #f4e4c1;
+}
+
+.toggle-checkbox:checked + .toggle-label::after {
+    left: 27px;
+    background: #f4e4c1;
+}
+
+.toggle-text {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+/* ==================== RANGE SLIDER ==================== */
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: rgba(138, 122, 94, 0.3);
+    border: 1px solid #8a7a5e;
+    outline: none;
+    appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #f4e4c1;
+    border: 2px solid #8a7a5e;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #f4e4c1;
+    border: 2px solid #8a7a5e;
+    cursor: pointer;
+}
+
+/* ==================== BUTTON GROUP ==================== */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.button-group .btn {
+    flex: 1;
+}
+
+/* ==================== COLLAPSE BUTTON ==================== */
+.collapse-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(138, 122, 94, 0.2);
+    border: 2px solid #8a7a5e;
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.collapse-btn:hover {
+    background: rgba(138, 122, 94, 0.3);
+    border-color: #f4e4c1;
+}
+
+#advancedIcon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+/* ==================== VIGNETTE EFFECT ==================== */
+.vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.5) 100%);
+    z-index: 2;
+}
+
+/* ==================== BACKGROUND CANVAS ==================== */
+#bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8a7a5e;
+    border: 1px solid #f4e4c1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #f4e4c1;
+}
+
+/* ==================== EMPTY STATE TEXT ==================== */
+.empty-text {
+    color: #8a7a5e;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+/* ==================== PAGE TITLE ==================== */
+.page-title {
+    font-family: 'Cinzel', serif;
+    font-size: 48px;
+    text-align: center;
+    color: #f4e4c1;
+    text-shadow: 
+        0 0 20px rgba(244, 228, 193, 0.5),
+        0 4px 8px rgba(0, 0, 0, 0.8);
+    letter-spacing: 8px;
+    margin-bottom: 20px;
+}
+
+/* ==================== UTILITY CLASSES ==================== */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+
+.hidden { display: none !important; }
+.visible { display: block !important; }

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMG - Create Server</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="css/game.css">
+    <script src="js/server.js"></script>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="create-server-container">
+        <h1 class="page-title">Create Server</h1>
+        <p class="setup-subtitle">Configure your multiplayer world</p>
+
+        <!-- Basic Settings -->
+        <div class="form-section">
+            <h3>Basic Settings</h3>
+            
+            <div class="form-group">
+                <label for="serverName">Server Name *</label>
+                <input type="text" id="serverName" placeholder="Epic Conquest" maxlength="50" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hostName">Your Name *</label>
+                <input type="text" id="hostName" placeholder="Enter your name" maxlength="30" required>
+            </div>
+
+            <div class="form-group">
+                <label for="serverDesc">Server Description</label>
+                <textarea id="serverDesc" placeholder="Describe your server and what kind of gameplay you're looking for..." rows="3"></textarea>
+            </div>
+
+            <div class="settings-row">
+                <div class="form-group half">
+                    <label for="maxPlayers">Max Players *</label>
+                    <select id="maxPlayers" class="select-input">
+                        <option value="2">2 Players</option>
+                        <option value="4">4 Players</option>
+                        <option value="6">6 Players</option>
+                        <option value="8" selected>8 Players</option>
+                        <option value="10">10 Players</option>
+                        <option value="12">12 Players</option>
+                    </select>
+                </div>
+
+                <div class="form-group half">
+                    <label for="gameSpeed">Game Speed</label>
+                    <select id="gameSpeed" class="select-input">
+                        <option value="Very Slow">Very Slow (5 min/turn)</option>
+                        <option value="Slow">Slow (3 min/turn)</option>
+                        <option value="Normal" selected>Normal (2 min/turn)</option>
+                        <option value="Fast">Fast (1 min/turn)</option>
+                        <option value="Blitz">Blitz (30 sec/turn)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="form-section">
+            <h3>Privacy & Security</h3>
+            
+            <div class="toggle-container">
+                <input type="checkbox" id="privateServer" class="toggle-checkbox">
+                <label for="privateServer" class="toggle-label">
+                    <span class="toggle-text">Private Server (Password Protected)</span>
+                </label>
+            </div>
+
+            <div class="form-group" id="passwordSection" style="display: none; margin-top: 15px;">
+                <label for="serverPassword">Server Password</label>
+                <input type="password" id="serverPassword" placeholder="Enter password">
+            </div>
+        </div>
+
+        <!-- Game Rules -->
+        <div class="form-section">
+            <h3>Game Rules</h3>
+            
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="allowAlliances" checked>
+                    <span>Allow Alliances</span>
+                </label>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="allowTrade" checked>
+                    <span>Allow Trade</span>
+                </label>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="allowChat" checked>
+                    <span>Allow Global Chat</span>
+                </label>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="friendlyFire">
+                    <span>Enable Friendly Fire (Allies can attack each other)</span>
+                </label>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="fogOfWar" checked>
+                    <span>Fog of War (Can't see other players' territories)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Win Conditions -->
+        <div class="form-section">
+            <h3>Victory Conditions</h3>
+            
+            <div class="form-group">
+                <label for="winCondition">Primary Win Condition</label>
+                <select id="winCondition" class="select-input">
+                    <option value="domination" selected>Domination (Control 75% of territories)</option>
+                    <option value="conquest">Total Conquest (Eliminate all opponents)</option>
+                    <option value="economic">Economic Victory ($100,000)</option>
+                    <option value="time">Time Limit (Highest score after X turns)</option>
+                    <option value="custom">Custom Goal</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="timeLimitSection" style="display: none;">
+                <label for="turnLimit">Turn Limit</label>
+                <input type="number" id="turnLimit" placeholder="100" min="10" max="500">
+            </div>
+
+            <div class="form-group" id="customGoalSection" style="display: none;">
+                <label for="customGoal">Custom Win Condition</label>
+                <textarea id="customGoal" placeholder="Describe your custom win condition..." rows="3"></textarea>
+            </div>
+        </div>
+
+        <!-- Advanced Settings (Collapsible) -->
+        <div class="form-section">
+            <button class="collapse-btn" onclick="toggleAdvanced()">
+                <span id="advancedIcon">▶</span> Advanced Settings
+            </button>
+            
+            <div id="advancedSettings" style="display: none; margin-top: 20px;">
+                <div class="settings-row">
+                    <div class="form-group half">
+                        <label for="startingMoney">Starting Money</label>
+                        <input type="number" id="startingMoney" value="5000" min="1000" max="50000" step="1000">
+                    </div>
+
+                    <div class="form-group half">
+                        <label for="startingMilitary">Starting Military</label>
+                        <input type="number" id="startingMilitary" value="20" min="10" max="100">
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="form-group half">
+                        <label for="resourceMultiplier">Resource Multiplier</label>
+                        <select id="resourceMultiplier" class="select-input">
+                            <option value="0.5">0.5x (Scarce)</option>
+                            <option value="1" selected>1x (Normal)</option>
+                            <option value="1.5">1.5x (Abundant)</option>
+                            <option value="2">2x (Very Abundant)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group half">
+                        <label for="mapSize">Map Size</label>
+                        <select id="mapSize" class="select-input">
+                            <option value="small">Small (50 territories)</option>
+                            <option value="medium" selected>Medium (100 territories)</option>
+                            <option value="large">Large (150 territories)</option>
+                            <option value="huge">Huge (200 territories)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="aiPlayers">
+                        <span>Fill empty slots with AI players</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="spectators">
+                        <span>Allow spectators</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="goBack()">Cancel</button>
+            <button class="btn btn-primary" onclick="createServer()">Create Server</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/server.js"></script>
+    <script>
+        // Background animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        for(let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                size: Math.random() * 2 + 1
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                
+                ctx.fillStyle = 'rgba(244, 228, 193, 0.3)';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Toggle password field
+        document.getElementById('privateServer').addEventListener('change', (e) => {
+            const passwordSection = document.getElementById('passwordSection');
+            passwordSection.style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        // Toggle win condition fields
+        document.getElementById('winCondition').addEventListener('change', (e) => {
+            document.getElementById('timeLimitSection').style.display = 
+                e.target.value === 'time' ? 'block' : 'none';
+            document.getElementById('customGoalSection').style.display = 
+                e.target.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Toggle advanced settings
+        function toggleAdvanced() {
+            const advanced = document.getElementById('advancedSettings');
+            const icon = document.getElementById('advancedIcon');
+            
+            if (advanced.style.display === 'none') {
+                advanced.style.display = 'block';
+                icon.textContent = '▼';
+            } else {
+                advanced.style.display = 'none';
+                icon.textContent = '▶';
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'server-pick.html';
+        }
+
+        function createServer() {
+            // Validate required fields
+            const serverName = document.getElementById('serverName').value.trim();
+            const hostName = document.getElementById('hostName').value.trim();
+            
+            if (!serverName) {
+                alert('Please enter a server name');
+                return;
+            }
+            
+            if (!hostName) {
+                alert('Please enter your name');
+                return;
+            }
+
+            const privateServer = document.getElementById('privateServer').checked;
+            const password = document.getElementById('serverPassword').value;
+            
+            if (privateServer && !password) {
+                alert('Please enter a password for your private server');
+                return;
+            }
+
+            // Create server object
+            const serverData = {
+                serverName: serverName,
+                hostName: hostName,
+                description: document.getElementById('serverDesc').value.trim(),
+                maxPlayers: parseInt(document.getElementById('maxPlayers').value),
+                gameSpeed: document.getElementById('gameSpeed').value,
+                hasPassword: privateServer,
+                password: privateServer ? password : null,
+                
+                // Game Rules
+                rules: {
+                    allowAlliances: document.getElementById('allowAlliances').checked,
+                    allowTrade: document.getElementById('allowTrade').checked,
+                    allowChat: document.getElementById('allowChat').checked,
+                    friendlyFire: document.getElementById('friendlyFire').checked,
+                    fogOfWar: document.getElementById('fogOfWar').checked
+                },
+                
+                // Victory Conditions
+                winCondition: document.getElementById('winCondition').value,
+                turnLimit: document.getElementById('turnLimit').value || null,
+                customGoal: document.getElementById('customGoal').value.trim() || null,
+                
+                // Advanced Settings
+                startingMoney: parseInt(document.getElementById('startingMoney').value),
+                startingMilitary: parseInt(document.getElementById('startingMilitary').value),
+                resourceMultiplier: parseFloat(document.getElementById('resourceMultiplier').value),
+                mapSize: document.getElementById('mapSize').value,
+                aiPlayers: document.getElementById('aiPlayers').checked,
+                spectators: document.getElementById('spectators').checked
+            };
+
+            // Send to WebSocket server
+            if (typeof createServerOnNetwork === 'function') {
+                createServerOnNetwork(serverData);
+                
+                alert('Server creation request sent! Redirecting...');
+                
+                // Redirect after short delay
+                setTimeout(() => {
+                    window.location.href = 'server-pick.html';
+                }, 1500);
+            } else {
+                alert('WebSocket connection not available. Please make sure you\'re connected to the server.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMG</title>
+    
+    <!-- Silksong Font - Trajan Pro similar -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/css/menu.css">
+</head>
+<body>
+    <!-- Animated Ocean & Sky Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Vignette Overlay -->
+    <div class="vignette"></div>
+
+    <!-- Ornamental Decorations -->
+    <div class="ornament ornament-top"></div>
+    <div class="ornament ornament-bottom"></div>
+
+    <!-- Press Start Screen -->
+    <div id="pressStart" class="press-start-screen">
+        <div class="press-start-content">
+            <h1 class="game-title">UMG</h1>
+            <p class="subtitle">A World Awaits</p>
+            <button class="press-start-btn" onclick="startGame()">Press Start</button>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Menu Container -->
+    <div class="menu-container" id="mainMenu" style="display: none;">
+        <h1 class="game-title">UMG</h1>
+        <p class="subtitle">One Map, Infinite Possibilities</p>
+        
+        <div class="menu-buttons">
+            <button class="btn" onclick="goToServerPick()">Server Play</button>
+            <button class="btn" onclick="showCredits()">Credits</button>
+        </div>
+    </div>
+
+    <div class="version-info">Version 1.0.0</div>
+
+    <!-- AUDIO ELEMENTS -->
+    <!-- 
+        Add your audio files here:
+        1. Background music - should loop
+        2. Button hover sound
+        3. Button click sound
+        4. Ambient ocean sounds
+    -->
+    <audio id="bgMusic" loop>
+        <source src="/audio/menu-music.mp3" type="audio/mpeg">
+        <!-- <source src="audio/menu-music.ogg" type="audio/ogg"> -->
+    </audio>
+
+    <audio id="hoverSound">
+        <!-- <source src="audio/hover.mp3" type="audio/mpeg"> -->
+    </audio>
+
+    <audio id="clickSound">
+        <!-- <source src="audio/click.mp3" type="audio/mpeg"> -->
+    </audio>
+
+    <audio id="ambientOcean" source src="" loop>
+        <!-- <source src="audio/ocean-ambient.mp3" type="audio/mpeg"> -->
+    </audio>
+
+    <!-- JavaScript Files -->
+    <script src="/js/menu.js"></script>
+</body>
+</html>

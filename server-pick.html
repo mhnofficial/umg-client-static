@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMG - Server Browser</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="js/server.js"></script>
+    
+    <style>
+        .server-browser-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1200px;
+            z-index: 10;
+        }
+
+        .browser-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .browser-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8a7a5e;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #8a7a5e;
+            color: #f4e4c1;
+            font-family: 'Spectral', serif;
+        }
+
+        .search-box input:focus {
+            border-color: #f4e4c1;
+            outline: none;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #8a7a5e;
+            color: #f4e4c1;
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .filter-btn.active {
+            border-color: #f4e4c1;
+            background: rgba(244, 228, 193, 0.2);
+        }
+
+        .filter-btn:hover {
+            border-color: #f4e4c1;
+        }
+
+        .server-list {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #8a7a5e;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(138, 122, 94, 0.3);
+        }
+
+        .server-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(138, 122, 94, 0.1);
+            border: 2px solid #8a7a5e;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .server-item:hover {
+            background: rgba(138, 122, 94, 0.25);
+            border-color: #f4e4c1;
+            transform: translateX(5px);
+        }
+
+        .server-info {
+            flex: 1;
+        }
+
+        .server-name {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            color: #f4e4c1;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .server-desc {
+            color: #d4c4a8;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .server-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #8a7a5e;
+        }
+
+        .server-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .server-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .player-count {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: #f4e4c1;
+        }
+
+        .player-count.full {
+            color: #e74c3c;
+        }
+
+        .server-status {
+            padding: 5px 15px;
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            letter-spacing: 2px;
+            border: 2px solid;
+        }
+
+        .server-status.open {
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+
+        .server-status.full {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .server-status.private {
+            border-color: #f39c12;
+            color: #f39c12;
+        }
+
+        .browser-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8a7a5e;
+        }
+
+        .empty-state h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8a7a5e;
+            color: #f4e4c1;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .refresh-btn:hover {
+            border-color: #f4e4c1;
+            transform: rotate(180deg);
+        }
+
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-modal.active {
+            display: flex;
+        }
+
+        .password-content {
+            background: rgba(10, 10, 10, 0.95);
+            border: 3px solid #8a7a5e;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(138, 122, 94, 0.5);
+        }
+
+        .password-content h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            color: #f4e4c1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .password-input-group {
+            margin: 20px 0;
+        }
+
+        .password-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .password-buttons .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="server-browser-container">
+        <div class="browser-header">
+            <h1 class="page-title">Server Browser</h1>
+            <p class="subtitle">Join the World</p>
+        </div>
+
+        <div class="browser-controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search servers...">
+            </div>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterServers('all')">All</button>
+                <button class="filter-btn" onclick="filterServers('open')">Open</button>
+                <button class="filter-btn" onclick="filterServers('password')">Password</button>
+            </div>
+        </div>
+
+        <div class="server-list" id="serverList">
+            <div class="empty-state">
+                <h3>Connecting to server...</h3>
+                <p>Please wait while we fetch available servers</p>
+            </div>
+        </div>
+
+        <div class="browser-footer">
+            <button class="btn btn-secondary" onclick="goToMenu()">Back to Menu</button>
+            <button class="btn btn-primary" onclick="goToCreateServer()">Create Server</button>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshServers()" title="Refresh">🔄</button>
+
+    <!-- Password Modal -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-content">
+            <h2>🔒 Enter Password</h2>
+            <p style="color: #d4c4a8; text-align: center; margin-bottom: 20px;">
+                This server is password protected
+            </p>
+            <div class="password-input-group">
+                <input type="password" id="serverPassword" placeholder="Enter server password">
+            </div>
+            <div class="password-buttons">
+                <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPassword()">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/server.js"></script>
+    <script>
+        // Background animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        for(let i = 0; i < 50; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 2 + 1
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                
+                ctx.fillStyle = 'rgba(244, 228, 193, 0.3)';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Server browser functionality
+        let currentFilter = 'all';
+        let selectedServer = null;
+        let allServers = [];
+
+        function goToMenu() {
+            window.location.href = 'index.html';
+        }
+
+        function goToCreateServer() {
+            window.location.href = 'server-create.html';
+        }
+
+        function filterServers(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            displayServers(allServers);
+        }
+
+        // Display servers in UI (called from server.js)
+        function displayServers(servers) {
+            allServers = servers;
+            const serverList = document.getElementById('serverList');
+            
+            // Filter servers
+            let filteredServers = servers;
+            if (currentFilter === 'open') {
+                filteredServers = servers.filter(s => s.currentPlayers < s.maxPlayers && !s.hasPassword);
+            } else if (currentFilter === 'password') {
+                filteredServers = servers.filter(s => s.hasPassword);
+            }
+
+            // Apply search
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filteredServers = filteredServers.filter(s => 
+                    s.serverName.toLowerCase().includes(searchTerm) || 
+                    (s.description && s.description.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (filteredServers.length === 0) {
+                serverList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Servers Found</h3>
+                        <p>Try adjusting your filters or create a new server</p>
+                    </div>
+                `;
+                return;
+            }
+
+            serverList.innerHTML = filteredServers.map(server => {
+                const isFull = server.currentPlayers >= server.maxPlayers;
+                const hasPassword = server.hasPassword;
+                const status = isFull ? 'full' : (hasPassword ? 'private' : 'open');
+                const statusText = isFull ? 'FULL' : (hasPassword ? 'PRIVATE' : 'OPEN');
+                
+                return `
+                    <div class="server-item" onclick='selectServer(${JSON.stringify(server).replace(/'/g, "&apos;")})'>
+                        <div class="server-info">
+                            <div class="server-name">${server.serverName}</div>
+                            <div class="server-desc">${server.description || 'No description'}</div>
+                            <div class="server-meta">
+                                <span>👤 Host: ${server.hostName}</span>
+                                <span>⚡ ${server.gameSpeed}</span>
+                            </div>
+                        </div>
+                        <div class="server-stats">
+                            <div class="player-count ${isFull ? 'full' : ''}">${server.currentPlayers}/${server.maxPlayers}</div>
+                            <div class="server-status ${status}">${statusText}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectServer(server) {
+            if (server.currentPlayers >= server.maxPlayers) {
+                alert('This server is full!');
+                return;
+            }
+
+            selectedServer = server;
+            
+            if (server.hasPassword) {
+                document.getElementById('passwordModal').classList.add('active');
+            } else {
+                joinServer(server);
+            }
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+            document.getElementById('serverPassword').value = '';
+        }
+
+        function submitPassword() {
+            const password = document.getElementById('serverPassword').value;
+            if (!password) {
+                alert('Please enter a password');
+                return;
+            }
+            
+            closePasswordModal();
+            joinServer(selectedServer, password);
+        }
+
+        function joinServer(server, password = null) {
+            // Join via WebSocket
+            if (typeof joinServerNetwork === 'function') {
+                joinServerNetwork(server.id, password);
+            }
+            
+            // Navigate to game
+            setTimeout(() => {
+                window.location.href = `server-game.html?server=${server.id}`;
+            }, 1000);
+        }
+
+        function refreshServers() {
+            document.getElementById('serverList').innerHTML = `
+                <div class="empty-state">
+                    <h3>Refreshing...</h3>
+                </div>
+            `;
+            
+            if (typeof requestServerList === 'function') {
+                requestServerList();
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', () => {
+            displayServers(allServers);
+        });
+
+        // Request server list on load
+        setTimeout(() => {
+            if (typeof requestServerList === 'function') {
+                requestServerList();
+            }
+        }, 1500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Intro</title>
+
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* CLICK TO ENTER */
+  #enter {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  /* INTRO TEXT */
+  #intro {
+    display: none;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    letter-spacing: 2px;
+  }
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap');
+
+#about {
+  display: none;
+  height: 100vh;
+  background: radial-gradient(circle at top, #120202, #000);
+  color: #e6e6e6;
+  justify-content: center;
+  align-items: center;
+}
+
+.credits {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 1.5px;
+}
+
+/* THIS is the important fix */
+.credits .h1 {
+  font-size: 3.2rem;
+  color: #c81d25;
+  margin: 0;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.credits .h1:hover {
+  opacity: 0.85;
+}
+
+.credits p {
+  margin: 12px 0;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.credits .sub {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.divider {
+  display: block;
+  width: 120px;
+  height: 1px;
+  background: #c81d25;
+  margin: 18px auto;
+  opacity: 0.8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="enter"></div>
+
+<div id="intro">stop</div>
+
+<div id="about">
+  <div class="credits">
+<h1>
+  <a href="https://www.youtube.com/@nickpost07">@nickpost07</a>
+</h1>
+    <p>coder · musician · perc40 fan</p>
+    <span class="divider"></span>
+    <p class="sub">gimme ideas in my yt</p>
+  </div>
+</div>
+
+
+<audio id="audio">
+  <source src="/audio/bowow.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const lyrics = [
+  { text: "stop", time: 250 },
+  { text: "stop playing", time: 250 },
+  { text: "stop playing with them", time: 250 },
+  { text: "stop playing with em riottt", time: 1100 }
+];
+
+let index = 0;
+
+function showNext() {
+  intro.textContent = lyrics[index].text;
+
+  setTimeout(() => {
+    index++;
+    if (index < lyrics.length) {
+      showNext();
+    } else {
+      // hide lyric first
+      intro.style.display = "none";
+
+      // THEN show about
+      about.style.display = "flex";
+    }
+  }, lyrics[index].time);
+}
+
+enter.addEventListener("click", () => {
+  enter.style.display = "none";
+  intro.style.display = "flex";
+  about.style.display = "none"; // force hidden
+  audio.play();
+  showNext();
+});
+
+
+</script>
+
+</body>
+</html>

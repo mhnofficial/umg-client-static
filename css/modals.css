@@ -1,0 +1,434 @@
+/* ===================================
+   MODALS.CSS - Modal Window Styles
+   All game modals (Invent, War, Trade, etc.)
+   =================================== */
+
+/* ==================== MODAL BASE ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ==================== MODAL CONTENT ==================== */
+.modal-content {
+    background: rgba(10, 10, 10, 0.95);
+    border: 3px solid #8a7a5e;
+    padding: 40px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 
+        inset 0 0 50px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(138, 122, 94, 0.5);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ==================== MODAL HEADER ==================== */
+.modal-content h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    color: #f4e4c1;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #8a7a5e;
+    text-shadow: 0 0 20px rgba(244, 228, 193, 0.3);
+}
+
+.modal-content p {
+    color: #d4c4a8;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* ==================== MODAL CLOSE BUTTON ==================== */
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 36px;
+    color: #8a7a5e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.modal-close:hover {
+    color: #f4e4c1;
+    transform: rotate(90deg);
+}
+
+/* ==================== CHAT BOX ==================== */
+.chat-box {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #8a7a5e;
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+    margin: 20px 0;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.chat-message {
+    background: rgba(138, 122, 94, 0.2);
+    padding: 10px;
+    margin: 8px 0;
+    border-left: 3px solid #8a7a5e;
+    color: #d4c4a8;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.chat-message strong {
+    color: #f4e4c1;
+    display: block;
+    margin-bottom: 5px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+}
+
+/* ==================== UPGRADE LIST ==================== */
+#upgradeList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.upgrade-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(138, 122, 94, 0.15);
+    border: 2px solid #8a7a5e;
+    transition: all 0.3s ease;
+}
+
+.upgrade-item:hover {
+    background: rgba(138, 122, 94, 0.25);
+    border-color: #f4e4c1;
+}
+
+.upgrade-item > div:first-child {
+    flex: 1;
+}
+
+.upgrade-item strong {
+    display: block;
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    margin-bottom: 5px;
+    letter-spacing: 2px;
+}
+
+.upgrade-item br + text {
+    color: #d4c4a8;
+    font-size: 14px;
+}
+
+.upgrade-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 2px solid #27ae60;
+    color: #27ae60;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.upgrade-btn:hover {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: #2ecc71;
+    color: #2ecc71;
+    transform: translateY(-2px);
+}
+
+.upgrade-btn:disabled {
+    border-color: #7f8c8d;
+    color: #7f8c8d;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.upgrade-btn:disabled:hover {
+    transform: none;
+    background: transparent;
+}
+
+/* ==================== STRUCTURE OPTIONS ==================== */
+#structureOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.structure-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(138, 122, 94, 0.15);
+    border: 2px solid #8a7a5e;
+    transition: all 0.3s ease;
+}
+
+.structure-option:hover {
+    background: rgba(138, 122, 94, 0.25);
+    border-color: #f4e4c1;
+}
+
+.structure-info {
+    flex: 1;
+}
+
+.structure-info strong {
+    display: block;
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.structure-info small {
+    color: #d4c4a8;
+    font-size: 13px;
+}
+
+.structure-cost {
+    color: #f1c40f;
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    margin-right: 15px;
+}
+
+/* ==================== TASKS LIST ==================== */
+#tasksList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task-item {
+    padding: 15px;
+    background: rgba(138, 122, 94, 0.15);
+    border: 2px solid #8a7a5e;
+    border-left: 4px solid #3498db;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover {
+    background: rgba(138, 122, 94, 0.25);
+    border-color: #f4e4c1;
+}
+
+.task-item.completed {
+    opacity: 0.6;
+    border-left-color: #27ae60;
+}
+
+.task-description {
+    color: #f4e4c1;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.task-reward {
+    color: #f1c40f;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.task-complete-btn {
+    padding: 6px 15px;
+    background: transparent;
+    border: 2px solid #27ae60;
+    color: #27ae60;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.task-complete-btn:hover {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: #2ecc71;
+}
+
+/* ==================== DETAILED STATS ==================== */
+#detailedStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stat-category {
+    background: rgba(138, 122, 94, 0.15);
+    border: 2px solid #8a7a5e;
+    padding: 15px;
+}
+
+.stat-category h4 {
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #8a7a5e;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(138, 122, 94, 0.2);
+}
+
+.stat-row span:first-child {
+    color: #d4c4a8;
+}
+
+.stat-row span:last-child {
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+}
+
+/* ==================== NATION SELECTOR ==================== */
+.nation-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 20px 0;
+}
+
+.nation-option {
+    padding: 15px;
+    background: rgba(138, 122, 94, 0.15);
+    border: 2px solid #8a7a5e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nation-option:hover {
+    background: rgba(138, 122, 94, 0.25);
+    border-color: #f4e4c1;
+}
+
+.nation-option.selected {
+    background: rgba(52, 152, 219, 0.3);
+    border-color: #3498db;
+}
+
+.nation-option strong {
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+}
+
+.nation-option small {
+    color: #8a7a5e;
+}
+
+.nation-status {
+    font-size: 20px;
+}
+
+/* ==================== SCROLLBAR (for modals) ==================== */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #8a7a5e;
+    border: 1px solid #f4e4c1;
+}
+
+.chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+    background: #8a7a5e;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 25px;
+        max-width: 95%;
+    }
+    
+    .modal-content h2 {
+        font-size: 24px;
+    }
+    
+    #detailedStats {
+        grid-template-columns: 1fr;
+    }
+    
+    .upgrade-item,
+    .structure-option {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .upgrade-btn,
+    .task-complete-btn {
+        width: 100%;
+    }
+}

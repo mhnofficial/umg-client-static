@@ -1,0 +1,433 @@
+/* ===================================
+   GAME.CSS - Game Screen Styles
+   Solo Play & Multiplayer Game Interface
+   =================================== */
+
+/* ==================== SETUP PHASE ==================== */
+.setup-phase {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    padding: 20px;
+}
+
+.setup-container {
+    max-width: 1000px;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #8a7a5e;
+    padding: 40px;
+    box-shadow: 
+        inset 0 0 50px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(138, 122, 94, 0.3);
+}
+
+.setup-subtitle {
+    text-align: center;
+    color: #d4c4a8;
+    font-size: 16px;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+/* Map Preview for Territory Selection */
+.map-preview {
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(to bottom, #1a2332 0%, #2c3e50 100%);
+    border: 2px solid #8a7a5e;
+    position: relative;
+    overflow: hidden;
+    margin: 20px 0;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.territory-option {
+    position: absolute;
+    background: #27ae60;
+    border: 2px solid #f4e4c1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.territory-option:hover {
+    background: #2ecc71;
+    opacity: 1;
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+}
+
+.territory-option.selected {
+    background: #3498db;
+    border: 3px solid #f1c40f;
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(52, 152, 219, 0.8);
+}
+
+/* Nation Form */
+.nation-form {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #8a7a5e;
+}
+
+/* ==================== GAME PHASE ==================== */
+.game-phase {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    position: relative;
+}
+
+/* ==================== TOP BAR ==================== */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid #8a7a5e;
+    z-index: 20;
+}
+
+.nation-info h2 {
+    font-size: 24px;
+    margin: 0;
+    color: #f4e4c1;
+}
+
+#gameTime {
+    font-size: 14px;
+    color: #d4c4a8;
+    letter-spacing: 2px;
+}
+
+/* ==================== GAME CONTAINER ==================== */
+.game-container {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* ==================== SIDEBARS ==================== */
+.left-sidebar,
+.right-sidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+/* Panel Base Style */
+.stats-panel,
+.nations-panel,
+.events-panel,
+.actions-panel,
+.inventions-panel,
+.structures-panel {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #8a7a5e;
+    padding: 20px;
+    box-shadow: 
+        inset 0 0 20px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(138, 122, 94, 0.2);
+}
+
+.stats-panel h3,
+.nations-panel h3,
+.events-panel h3,
+.actions-panel h3,
+.inventions-panel h3,
+.structures-panel h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #8a7a5e;
+    color: #f4e4c1;
+}
+
+/* Stats Panel */
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(138, 122, 94, 0.2);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #d4c4a8;
+}
+
+.stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #f4e4c1;
+}
+
+/* Nations List */
+.nation-item {
+    padding: 10px;
+    margin: 5px 0;
+    background: rgba(138, 122, 94, 0.1);
+    border-left: 3px solid #8a7a5e;
+    transition: all 0.3s ease;
+}
+
+.nation-item:hover {
+    background: rgba(138, 122, 94, 0.2);
+    border-left-color: #f4e4c1;
+}
+
+.nation-item span {
+    display: block;
+    font-size: 14px;
+}
+
+.nation-item small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #8a7a5e;
+}
+
+/* Event Log */
+.event-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(138, 122, 94, 0.2);
+}
+
+.event-day {
+    display: inline-block;
+    font-size: 11px;
+    color: #8a7a5e;
+    margin-right: 10px;
+}
+
+.event-message {
+    font-size: 13px;
+    color: #d4c4a8;
+}
+
+/* Actions Grid */
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px 10px;
+    background: rgba(138, 122, 94, 0.2);
+    border: 2px solid #8a7a5e;
+    color: #f4e4c1;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.action-btn:hover {
+    background: rgba(138, 122, 94, 0.4);
+    border-color: #f4e4c1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(244, 228, 193, 0.3);
+}
+
+.action-icon {
+    font-size: 24px;
+}
+
+/* Inventions & Structures Lists */
+.invention-item,
+.structure-item {
+    padding: 10px;
+    margin: 8px 0;
+    background: rgba(138, 122, 94, 0.1);
+    border-left: 3px solid #8a7a5e;
+}
+
+.invention-item strong,
+.structure-item strong {
+    display: block;
+    color: #f4e4c1;
+    margin-bottom: 5px;
+}
+
+.invention-item small {
+    color: #d4c4a8;
+    font-size: 11px;
+}
+
+/* ==================== GAME MAP ==================== */
+.game-map-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.game-map {
+    flex: 1;
+    background: linear-gradient(to bottom, #1a2332 0%, #2c3e50 100%);
+    border: 3px solid #8a7a5e;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        inset 0 0 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(138, 122, 94, 0.3);
+}
+
+/* Map Territories */
+.map-territory {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.map-territory:hover {
+    border-width: 3px;
+    border-color: #f1c40f;
+    z-index: 10;
+}
+
+/* Territory Colors */
+.player-territory {
+    background: rgba(52, 152, 219, 0.6);
+    border-color: #3498db;
+}
+
+.ally-territory {
+    background: rgba(46, 204, 113, 0.5);
+    border-color: #2ecc71;
+}
+
+.enemy-territory {
+    background: rgba(231, 76, 60, 0.5);
+    border-color: #e74c3c;
+}
+
+.neutral-territory {
+    background: rgba(149, 165, 166, 0.4);
+    border-color: #95a5a6;
+}
+
+.unclaimed-territory {
+    background: rgba(138, 122, 94, 0.3);
+    border-color: #8a7a5e;
+}
+
+/* Map Legend */
+.map-legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #8a7a5e;
+    padding: 15px;
+    font-size: 12px;
+}
+
+.map-legend > div {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    margin-right: 10px;
+}
+
+.legend-color.player { background: rgba(52, 152, 219, 0.6); }
+.legend-color.ally { background: rgba(46, 204, 113, 0.5); }
+.legend-color.enemy { background: rgba(231, 76, 60, 0.5); }
+.legend-color.neutral { background: rgba(149, 165, 166, 0.4); }
+.legend-color.unclaimed { background: rgba(138, 122, 94, 0.3); }
+
+/* ==================== SERVER CREATION ==================== */
+.create-server-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #8a7a5e;
+    box-shadow: 
+        inset 0 0 50px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(138, 122, 94, 0.3);
+    position: relative;
+    z-index: 10;
+}
+
+.form-section {
+    margin-top: 30px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1400px) {
+    .left-sidebar,
+    .right-sidebar {
+        width: 240px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .game-container {
+        flex-direction: column;
+    }
+    
+    .left-sidebar,
+    .right-sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .stats-panel,
+    .nations-panel,
+    .events-panel,
+    .actions-panel,
+    .inventions-panel,
+    .structures-panel {
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .actions-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .setup-container {
+        padding: 20px;
+    }
+    
+    .map-preview {
+        height: 300px;
+    }
+}
