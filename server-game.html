@@ -11,6 +11,7 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/modals.css">
+    
     <style>
         .online-indicator {
             display: inline-block;
@@ -409,12 +410,14 @@
 
     <script src="js/main.js"></script>
     <script src="js/game-state.js"></script>
-    <script src="js/game-core.js"></script> <script src="js/server.js"></script>
+    <script src="js/game-core.js"></script> 
+
+    <script src="js/server.js"></script>
     
     <script src="js/actions/truce.js"></script>
     
     <script>
-        // --- Game Setup and Utility Functions ---
+        // --- Canvas Background Animation ---
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -452,9 +455,9 @@
         }
         animate();
 
-        // --- UI Helper Functions (These were defined in the original inline script) ---
-
-        // Add chat message function
+        // --- UI Helper Functions ---
+        
+        // Add chat message function (called by js/game-core.js)
         function addChatMessage(author, text, isSystem = false) {
             const chatMessages = document.getElementById('chatMessages');
             const msgDiv = document.createElement('div');
@@ -467,20 +470,18 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Update players list
-        // NOTE: This relies on a global 'serverState' object, which should be handled by js/game-state.js
-        function updatePlayersList() {
+        // Update players list (called by js/game-core.js)
+        function updatePlayersList(players) {
             const playersList = document.getElementById('playersList');
             
-            // Placeholder/Safety Check (Assuming serverState is a global object)
-            if (typeof serverState === 'undefined' || !serverState.players || serverState.players.length === 0) {
+            if (!players || Object.keys(players).length === 0) {
                 playersList.innerHTML = '<p class="empty-text">Waiting for players...</p>';
                 return;
             }
 
-            playersList.innerHTML = serverState.players.map(player => {
-                const isSelf = serverState.playerData && player.id === serverState.playerData.id;
-                const isHost = serverState.isHost && isSelf;
+            playersList.innerHTML = Object.values(players).map(player => {
+                const isSelf = window.playerID && player.id === window.playerID;
+                const isHost = window.gameState && window.gameState.players && Object.keys(window.gameState.players)[0] === player.id;
                 
                 return `
                     <div class="player-item">
@@ -497,9 +498,16 @@
                     </div>
                 `;
             }).join('');
+            
+            // Populate truce target dropdown with available players (excluding self)
+            const truceTargetSelect = document.getElementById('truceTarget');
+            truceTargetSelect.innerHTML = Object.values(players)
+                .filter(p => p.id !== window.playerID)
+                .map(p => `<option value="${p.id}">${p.name}</option>`)
+                .join('');
         }
 
-        // Update server info display
+        // Update server info display (called by js/game-core.js)
         function updateServerInfo(server) {
             if (!server) return;
             
@@ -510,7 +518,7 @@
                 `${server.currentPlayers}/${server.maxPlayers}`;
         }
         
-        // --- Modal/Action Handlers ---
+        // --- Modal Control ---
         
         function openSettings() {
             document.getElementById('settingsModal').classList.add('active');
@@ -523,30 +531,104 @@
         function openModal(modalId) {
             document.getElementById(modalId).classList.add('active');
         }
-
-        // Action function placeholders using the network bridge (defined in js/server.js)
-        function endTurn() {
-             window.sendActionToNetwork({ type: 'END_TURN' }); 
+        
+        // --- Full Action Implementations (No Gatekeeping) ---
+        
+        function endTurn() { 
+            if (window.sendActionToNetwork) { 
+                window.sendActionToNetwork({ type: 'END_TURN' }); 
+            } else { 
+                addChatMessage('System', 'Network bridge not fully loaded. Cannot end turn.', true);
+            }
         }
-        function expandLand() {
-             window.sendActionToNetwork({ type: 'EXPAND_LAND' }); 
-             logMessage('Sending EXPAND_LAND action.', 'system');
-        }
+        
         function sendGlobalChat() {
             const input = document.getElementById('chatInput');
-            if (input.value.trim()) {
+            if (input.value.trim() && window.sendChatMessageToNetwork) {
+                // Ensure the chat message is sent through the network bridge
                 window.sendChatMessageToNetwork(input.value.trim());
                 input.value = '';
             }
         }
+        
         function proposeTruce() {
-            window.sendActionToNetwork({ type: 'PROPOSE_TRUCE', targetId: document.getElementById('truceTarget').value });
-            closeModal('truceModal');
-        }
-        function leaveServer() {
-             window.location.href = 'server-pick.html'; 
+            const targetId = document.getElementById('truceTarget').value;
+            const duration = document.getElementById('truceDuration').value;
+            const terms = document.getElementById('truceTerms').value;
+
+            if (!targetId) {
+                addChatMessage('System', 'ERROR: Please select a player for the truce.', true);
+                return;
+            }
+
+            if (window.sendActionToNetwork) {
+                window.sendActionToNetwork({ 
+                    type: 'PROPOSE_TRUCE', 
+                    targetId: targetId,
+                    duration: duration,
+                    terms: terms 
+                });
+                addChatMessage('System', `Truce proposed to ${window.gameState.players[targetId].name} for ${duration} turns.`, true);
+                closeModal('truceModal');
+            }
         }
 
+        function expandLand() {
+            // This would normally open a map-based selection modal, but for a simplified action:
+            if (window.sendActionToNetwork) {
+                window.sendActionToNetwork({ type: 'EXPAND_LAND' });
+                addChatMessage('System', 'Expansion initiated. Check the map for new territory claims.', true);
+            }
+        }
+
+        // Placeholder handlers for remaining action buttons:
+        
+        function leaveServer() {
+            // Placeholder: Simply redirects to the server list
+            window.location.href = 'server-pick.html'; 
+        }
+
+        function openInventModal() {
+            // Logic to populate and show technology trees
+            openModal('inventModal');
+            addChatMessage('System', 'Invent modal opened. Server needs to implement RESEARCH action.', true);
+        }
+
+        function openCreateModal() {
+            // Logic to show unit/building creation options
+            openModal('createModal');
+            addChatMessage('System', 'Create modal opened. Server needs to implement CREATE action.', true);
+        }
+
+        function openWarModal() {
+            // Logic to show attack/declare war options
+            openModal('warModal');
+            addChatMessage('System', 'War modal opened. Map click should send ATTACK action.', true);
+        }
+
+        function openUpgradeModal() {
+            // Logic to show territory/unit upgrade options
+            openModal('upgradeModal');
+            addChatMessage('System', 'Upgrade modal opened. Server needs to implement UPGRADE action.', true);
+        }
+
+        function openTasksModal() {
+            // Logic to show in-game tasks/missions
+            openModal('tasksModal');
+            addChatMessage('System', 'Tasks modal opened. Server needs to implement TASK_COMPLETE action.', true);
+        }
+
+        function openAllyModal() {
+            // Logic to show alliance proposal options
+            openModal('allyModal');
+            addChatMessage('System', 'Ally modal opened. Server needs to implement PROPOSE_ALLY action.', true);
+        }
+
+        function openTradeModal() {
+            // Logic to show resource trade options
+            openModal('tradeModal');
+            addChatMessage('System', 'Trade modal opened. Server needs to implement TRADE action.', true);
+        }
     </script>
 </body>
 </html>
