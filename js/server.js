@@ -9,7 +9,7 @@ const socket = io(SERVER_URL, {
     timeout: 10000, 
     // CRITICAL FIX: Forces the client to use HTTP Polling first. 
     // This bypasses cloud hosting restrictions on direct WebSockets.
-    transports: ['polling', 'websocket'] 
+    transports: ['polling'] 
 });
 
 // --- Utility Functions ---
