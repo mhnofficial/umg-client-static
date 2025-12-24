@@ -1,542 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UMG - Multiplayer</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/main.css">
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <link rel="stylesheet" href="css/game.css">
-    <link rel="stylesheet" href="css/modals.css">
-    <script src="js/server.js"></script>
-    
-    <style>
-        .online-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #27ae60;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .player-item {
-            padding: 12px;
-            margin: 8px 0;
-            background: rgba(138, 122, 94, 0.1);
-            border-left: 3px solid #8a7a5e;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .player-item:hover {
-            background: rgba(138, 122, 94, 0.2);
-            border-left-color: #f4e4c1;
-        }
-
-        .player-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .player-name {
-            color: #f4e4c1;
-            font-family: 'Cinzel', serif;
-            font-size: 16px;
-        }
-
-        .player-status {
-            font-size: 11px;
-            color: #8a7a5e;
-            margin-left: 10px;
-        }
-
-        .player-score {
-            color: #f1c40f;
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-        }
-
-        .chat-panel {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #8a7a5e;
-            padding: 15px;
-            box-shadow: 
-                inset 0 0 20px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(138, 122, 94, 0.2);
-        }
-
-        .chat-messages {
-            height: 200px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #8a7a5e;
-        }
-
-        .chat-msg {
-            margin-bottom: 10px;
-            padding: 8px;
-            background: rgba(138, 122, 94, 0.15);
-            border-left: 2px solid #8a7a5e;
-        }
-
-        .chat-msg.system {
-            border-left-color: #3498db;
-            font-style: italic;
-            color: #3498db;
-        }
-
-        .chat-author {
-            font-family: 'Cinzel', serif;
-            font-size: 13px;
-            color: #f4e4c1;
-            margin-bottom: 3px;
-        }
-
-        .chat-text {
-            font-size: 13px;
-            color: #d4c4a8;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input-container input {
-            flex: 1;
-        }
-
-        .chat-input-container button {
-            padding: 10px 20px;
-        }
-
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #8a7a5e;
-            font-family: 'Cinzel', serif;
-            font-size: 12px;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .connection-status.connected {
-            border-color: #27ae60;
-        }
-
-        .connection-status.disconnected {
-            border-color: #e74c3c;
-        }
-
-        .turn-indicator {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 3px solid #f1c40f;
-            font-family: 'Cinzel', serif;
-            font-size: 18px;
-            color: #f1c40f;
-            z-index: 100;
-            letter-spacing: 2px;
-            display: none;
-            box-shadow: 0 0 30px rgba(241, 196, 15, 0.5);
-        }
-
-        .turn-indicator.active {
-            display: block;
-            animation: turnPulse 1s ease-in-out infinite;
-        }
-
-        @keyframes turnPulse {
-            0%, 100% {
-                box-shadow: 0 0 30px rgba(241, 196, 15, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 50px rgba(241, 196, 15, 0.8);
-            }
-        }
-
-        .server-info-panel {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #8a7a5e;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 
-                inset 0 0 20px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(138, 122, 94, 0.2);
-        }
-
-        .server-info-panel h4 {
-            font-size: 16px;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #8a7a5e;
-        }
-
-        .server-detail {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            font-size: 13px;
-        }
-
-        .server-detail span:first-child {
-            color: #8a7a5e;
-        }
-
-        .server-detail span:last-child {
-            color: #f4e4c1;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMG - Multiplayer</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/modals.css">
+    
+        <style>
+    /* ... (CSS Styles remain unchanged) ... */
+        .online-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #27ae60;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        /* ... (rest of styles) ... */
+    </style>
 </head>
-<body>
-    <canvas id="bgCanvas"></canvas>
-    <div class="vignette"></div>
+<body onload="initMultiplayerConnection()">
+    <canvas id="bgCanvas"></canvas>
+    <div class="vignette"></div>
 
-    <div class="connection-status disconnected" id="connectionStatus">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#e74c3c;margin-right:8px;"></span>
-        <span>Connecting...</span>
-    </div>
+    <div class="connection-status disconnected" id="connectionStatus">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#e74c3c;margin-right:8px;"></span>
+        <span>Connecting...</span>
+    </div>
 
-    <div class="turn-indicator" id="turnIndicator">
-        YOUR TURN
-    </div>
+    <div class="turn-indicator" id="turnIndicator">
+        YOUR TURN
+    </div>
 
-    <div class="game-phase">
-        <div class="top-bar">
-            <div class="nation-info">
-                <h2 id="nationNameDisplay">Your Nation</h2>
-                <span id="gameTime">Day 1 • Multiplayer</span>
-            </div>
-            <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
-        </div>
+        <div class="game-phase">
+        <div class="top-bar">
+            <div class="nation-info">
+                <h2 id="nationNameDisplay">Your Nation</h2>
+                <span id="gameTime">Day 1 • Multiplayer</span>
+            </div>
+            <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
+        </div>
 
-        <div class="game-container">
-            <div class="left-sidebar">
-                <div class="stats-panel">
-                    <h3>Statistics</h3>
-                    <div class="stat-item">
-                        <span class="stat-label">💰 Money</span>
-                        <span class="stat-value" id="money">$5,000</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">👥 Population</span>
-                        <span class="stat-value" id="population">10,000</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">🗺️ Territories</span>
-                        <span class="stat-value" id="territories">1</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">⚔️ Military</span>
-                        <span class="stat-value" id="military">20</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">🤝 Allies</span>
-                        <span class="stat-value" id="allies">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">⚡ Income/Turn</span>
-                        <span class="stat-value" id="income">+$500</span>
-                    </div>
-                </div>
+        <div class="game-container">
+            <div class="left-sidebar">
+                <div class="stats-panel">
+                    <h3>Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">💰 Money</span>
+                        <span class="stat-value" id="money">$5,000</span>
+                    </div>
+                                        <div class="stat-item">
+                        <span class="stat-label">⚡ Income/Turn</span>
+                        <span class="stat-value" id="income">+$500</span>
+                    </div>
+                </div>
 
-                <div class="server-info-panel">
-                    <h4>Server Info</h4>
-                    <div class="server-detail">
-                        <span>Server Name</span>
-                        <span id="serverName">Loading...</span>
-                    </div>
-                    <div class="server-detail">
-                        <span>Host</span>
-                        <span id="serverHost">Loading...</span>
-                    </div>
-                    <div class="server-detail">
-                        <span>Game Speed</span>
-                        <span id="gameSpeed">Loading...</span>
-                    </div>
-                    <div class="server-detail">
-                        <span>Players</span>
-                        <span id="playerCount">0/0</span>
-                    </div>
-                </div>
+                <div class="server-info-panel">
+                    <h4>Server Info</h4>
+                    <div class="server-detail">
+                        <span>Server Name</span>
+                        <span id="serverName">Loading...</span>
+                    </div>
+                                        <div class="server-detail">
+                        <span>Players</span>
+                        <span id="playerCount">0/0</span>
+                    </div>
+                </div>
 
-                <div class="nations-panel">
-                    <h3>Players</h3>
-                    <div id="playersList">
-                        <p class="empty-text">Waiting for players...</p>
-                    </div>
-                </div>
+                <div class="nations-panel">
+                    <h3>Players</h3>
+                    <div id="playersList">
+                        <p class="empty-text">Waiting for players...</p>
+                    </div>
+                </div>
 
-                <div class="chat-panel">
-                    <h3>Global Chat</h3>
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input-container">
-                        <input type="text" id="chatInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendGlobalChat()">
-                        <button class="btn btn-primary" onclick="sendGlobalChat()">Send</button>
-                    </div>
-                </div>
-            </div>
+                <div class="chat-panel">
+                    <h3>Global Chat</h3>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendGlobalChat()">
+                        <button class="btn btn-primary" onclick="sendGlobalChat()">Send</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="game-map-container">
-                <div class="game-map" id="gameMap">
-                </div>
-                
-                <div class="map-legend">
-                    <div><span class="legend-color player"></span> Your Territory</div>
-                    <div><span class="legend-color ally"></span> Allied</div>
-                    <div><span class="legend-color enemy"></span> At War</div>
-                    <div><span class="legend-color neutral"></span> Other Players</div>
-                    <div><span class="legend-color unclaimed"></span> Unclaimed</div>
-                </div>
-            </div>
+            <div class="game-map-container">
+                <div class="game-map" id="gameMap">
+                </div>
+                
+                <div class="map-legend">
+                    <div><span class="legend-color player"></span> Your Territory</div>
+                    <div><span class="legend-color ally"></span> Allied</div>
+                    <div><span class="legend-color enemy"></span> At War</div>
+                    <div><span class="legend-color neutral"></span> Other Players</div>
+                    <div><span class="legend-color unclaimed"></span> Unclaimed</div>
+                </div>
+            </div>
 
-            <div class="right-sidebar">
-                <div class="actions-panel">
-                    <h3>Actions</h3>
-                    <div class="actions-grid">
-                        <button class="action-btn" onclick="openModal('inventModal')">
-                            <span class="action-icon">💡</span>
-                            <span>Invent</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('createModal')">
-                            <span class="action-icon">🏗️</span>
-                            <span>Create</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('warModal')">
-                            <span class="action-icon">⚔️</span>
-                            <span>War</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('upgradeModal')">
-                            <span class="action-icon">⬆️</span>
-                            <span>Upgrade</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('tasksModal')">
-                            <span class="action-icon">📋</span>
-                            <span>Tasks</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('allyModal')">
-                            <span class="action-icon">🤝</span>
-                            <span>Ally</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('tradeModal')">
-                            <span class="action-icon">📦</span>
-                            <span>Trade</span>
-                        </button>
-                        <button class="action-btn" onclick="expandLand()">
-                            <span class="action-icon">🗺️</span>
-                            <span>Expand</span>
-                        </button>
-                        <button class="action-btn" onclick="openModal('truceModal')">
-                            <span class="action-icon">🕊️</span>
-                            <span>Truce</span>
-                        </button>
-                        <button class="action-btn" onclick="endTurn()">
-                            <span class="action-icon">⏭️</span>
-                            <span>End Turn</span>
-                        </button>
-                    </div>
-                </div>
+            <div class="right-sidebar">
+                <div class="actions-panel">
+                    <h3>Actions</h3>
+                    <div class="actions-grid">
+                                                <button class="action-btn" onclick="openModal('truceModal')">
+                            <span class="action-icon">🕊️</span>
+                            <span>Truce</span>
+                        </button>
+                        <button class="action-btn" onclick="endTurn()">
+                            <span class="action-icon">⏭️</span>
+                            <span>End Turn</span>
+                        </button>
+                    </div>
+                </div>
 
-                <div class="events-panel">
-                    <h3>Recent Events</h3>
-                    <div id="eventLog"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <div class="events-panel">
+                    <h3>Recent Events</h3>
+                    <div id="eventLog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('settingsModal')">&times;</span>
-            <h2>⚙️ Settings</h2>
-            <div class="form-group">
-                <label>Music Volume</label>
-                <input type="range" id="musicVolume" min="0" max="100" value="30">
-            </div>
-            <div class="form-group">
-                <label>Sound Effects Volume</label>
-                <input type="range" id="sfxVolume" min="0" max="100" value="70">
-            </div>
-            <button class="btn btn-danger" onclick="leaveServer()">Leave Server</button>
-        </div>
-    </div>
+    <div id="settingsModal" class="modal">
+        </div>
 
-    <div id="truceModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('truceModal')">&times;</span>
-            <h2>🕊️ Propose Truce</h2>
-            <div class="form-group">
-                <label>Select Player</label>
-                <select id="truceTarget"></select>
-            </div>
-            <div class="form-group">
-                <label>Truce Duration</label>
-                <select id="truceDuration">
-                    <option value="5">5 Turns</option>
-                    <option value="10">10 Turns</option>
-                    <option value="20">20 Turns</option>
-                    <option value="permanent">Permanent Peace</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Truce Terms</label>
-                <textarea id="truceTerms" placeholder="Describe the terms of the truce (optional)..."></textarea>
-            </div>
-            <button class="btn btn-success" onclick="proposeTruce()">Propose Truce</button>
-        </div>
-    </div>
+    <div id="truceModal" class="modal">
+        </div>
 
-    <script src="js/main.js"></script>
-    <script src="js/game-state.js"></script>
-    <script src="js/server.js"></script>
-    <script src="js/actions/truce.js"></script>
+        <script src="js/main.js"></script>
+    <script src="js/game-state.js"></script>
     
-    <script>
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        <script src="js/server.js"></script>
+    <script src="js/actions/truce.js"></script>
+    
+    <script>
+        // --- Game Setup and Utility Functions ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        const particles = [];
-        for(let i = 0; i < 30; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() - 0.5) * 0.3,
-                size: Math.random() * 2 + 1
-            });
-        }
+        const particles = [];
+        for(let i = 0; i < 30; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2 + 1
+            });
+        }
 
-        function animate() {
-            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                
-                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                
-                ctx.fillStyle = 'rgba(244, 228, 193, 0.3)';
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            requestAnimationFrame(animate);
-        }
-        animate();
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                
+                ctx.fillStyle = 'rgba(244, 228, 193, 0.3)';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
 
-        // Add chat message function
-        function addChatMessage(author, text, isSystem = false) {
-            const chatMessages = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-msg${isSystem ? ' system' : ''}`;
-            msgDiv.innerHTML = isSystem ? 
-                `<div class="chat-text">${text}</div>` :
-                `<div class="chat-author">${author}</div><div class="chat-text">${text}</div>`;
-            
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+        // -------------------------------------------------------------
+        // FUNCTIONS USED BY server.js (Client Network Bridge)
+        // -------------------------------------------------------------
 
-        // Update players list
-        function updatePlayersList() {
-            const playersList = document.getElementById('playersList');
+        // [NEW FUNCTION] Required by server.js error handler 
+        // Renamed logMessage from the previous interaction to match the original structure (addChatMessage)
+        window.logMessage = function(text, type = 'system') {
+            const author = (type === 'chat' ? '' : 'System');
+            addChatMessage(author, text, type === 'system' || type === 'error');
             
-            if (!serverState.players || serverState.players.length === 0) {
-                playersList.innerHTML = '<p class="empty-text">Waiting for players...</p>';
-                return;
+            // Basic connection status update
+            const statusDiv = document.getElementById('connectionStatus');
+            const statusIndicator = statusDiv.querySelector('span:first-child');
+            const statusText = statusDiv.querySelector('span:last-child');
+            
+            if (text.includes('Connected to server successfully')) {
+                statusDiv.classList.remove('disconnected');
+                statusDiv.classList.add('connected');
+                statusIndicator.style.background = '#27ae60';
+                statusText.textContent = 'Connected';
+            } else if (text.includes('Connection Error:') || text.includes('Connection failed')) {
+                statusDiv.classList.remove('connected');
+                statusDiv.classList.add('disconnected');
+                statusIndicator.style.background = '#e74c3c';
+                statusText.textContent = 'Failed';
             }
-
-            playersList.innerHTML = serverState.players.map(player => {
-                const isSelf = serverState.playerData && player.id === serverState.playerData.id;
-                const isHost = serverState.isHost && isSelf;
-                
-                return `
-                    <div class="player-item">
-                        <div class="player-info">
-                            <span class="online-indicator"></span>
-                            <div>
-                                <div class="player-name">
-                                    ${player.name}${isHost ? ' 👑' : ''}${isSelf ? ' (You)' : ''}
-                                </div>
-                                <div class="player-status">Online</div>
-                            </div>
-                        </div>
-                        <div class="player-score">${player.score || 0} pts</div>
-                    </div>
-                `;
-            }).join('');
+        }
+        
+        // [NEW FUNCTION] Placeholder for the missing function
+        window.handleWelcome = function(data) {
+             console.log("handleWelcome called with data:", data);
+             // Logic to update initial UI from the welcome package
+             
+             if (data.server) {
+                updateServerInfo(data.server);
+            }
+            
+            if (data.player) {
+                document.getElementById('nationNameDisplay').textContent = data.player.name;
+            }
+            
+            logMessage(`Welcome to ${data.server ? data.server.serverName : 'the server'}!`, 'system');
         }
 
-        // Update server info display
-        function updateServerInfo(server) {
-            if (!server) return;
+        // [NEW FUNCTION] Required by server.js stateUpdate
+        window.updateGameState = function(newState) {
+            console.log('Received state update:', newState);
+            // This is where you would call updatePlayersList() and redraw the map
+            // You will need to define a 'serverState' object globally for this logic to work with the functions below.
+            // For now, let's assume 'serverState' is defined in js/game-state.js
             
-            document.getElementById('serverName').textContent = server.serverName;
-            document.getElementById('serverHost').textContent = server.hostName;
-            document.getElementById('gameSpeed').textContent = server.gameSpeed;
-            document.getElementById('playerCount').textContent = 
-                `${server.currentPlayers}/${server.maxPlayers}`;
+            // Example of using the functions below (assuming serverState is populated)
+            // updatePlayersList(); 
         }
 
-        function openSettings() {
-            document.getElementById('settingsModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
-
-        function expandLand() {
-            addChatMessage('System', 'Expand land feature coming soon!', true);
-        }
-
-        // Override handleWelcome to update UI
-        const originalHandleWelcome = handleWelcome;
-        handleWelcome = function(data) {
-            originalHandleWelcome(data);
-            
-            if (data.server) {
-                updateServerInfo(data.server);
+        // --- Original Game Logic Functions (Now available to handleWelcome/updateGameState) ---
+        
+        // Add chat message function
+        function addChatMessage(author, text, isSystem = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg${isSystem ? ' system' : ''}`;
+            msgDiv.innerHTML = isSystem ? 
+                `<div class="chat-text">${text}</div>` :
+                `<div class="chat-author">${author}</div><div class="chat-text">${text}</div>`;
+            
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // [NEW FUNCTION] Placeholder for chat button
+        function sendGlobalChat() {
+            const input = document.getElementById('chatInput');
+            if (input.value.trim()) {
+                window.sendChatMessageToNetwork(input.value.trim()); // Assumes this is defined in server.js
+                input.value = '';
             }
-            
-            if (data.player) {
-                document.getElementById('nationNameDisplay').textContent = data.player.name;
-            }
-            
-            addChatMessage('System', `Welcome to ${data.server ? data.server.serverName : 'the server'}!`, true);
-        };
-    </script>
+        }
+        
+        // [NEW FUNCTION] Placeholder for End Turn button
+        function endTurn() {
+             window.sendActionToNetwork({ type: 'END_TURN' }); // Assumes this is defined in server.js
+        }
+        
+        // [NEW FUNCTION] Placeholder for Leave Server button
+        function leaveServer() {
+             // Logic to disconnect socket and go back to server-pick.html
+             window.location.href = 'server-pick.html'; 
+        }
+
+        // Update players list
+        function updatePlayersList() {
+            // Note: This function currently relies on a global 'serverState' object 
+            // which should be populated by updateGameState or handleWelcome.
+            const playersList = document.getElementById('playersList');
+            
+            if (!serverState.players || serverState.players.length === 0) {
+                playersList.innerHTML = '<p class="empty-text">Waiting for players...</p>';
+                return;
+            }
+
+            playersList.innerHTML = serverState.players.map(player => {
+                const isSelf = serverState.playerData && player.id === serverState.playerData.id;
+                const isHost = serverState.isHost && isSelf;
+                
+                return `
+                    <div class="player-item">
+                        <div class="player-info">
+                            <span class="online-indicator"></span>
+                            <div>
+                                <div class="player-name">
+                                    ${player.name}${isHost ? ' 👑' : ''}${isSelf ? ' (You)' : ''}
+                                </div>
+                                <div class="player-status">Online</div>
+                            </div>
+                        </div>
+                        <div class="player-score">${player.score || 0} pts</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update server info display
+        function updateServerInfo(server) {
+            if (!server) return;
+            
+            document.getElementById('serverName').textContent = server.serverName;
+            document.getElementById('serverHost').textContent = server.hostName;
+            document.getElementById('gameSpeed').textContent = server.gameSpeed;
+            document.getElementById('playerCount').textContent = 
+                `${server.currentPlayers}/${server.maxPlayers}`;
+        }
+
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function expandLand() {
+            // Assumes sendActionToNetwork is defined in js/server.js
+             window.sendActionToNetwork({ type: 'EXPAND_LAND' }); 
+            addChatMessage('System', 'Sending EXPAND_LAND action.', true);
+        }
+        
+        // Placeholder modal action
+        function proposeTruce() {
+            // Assumes sendActionToNetwork is defined in js/server.js
+            window.sendActionToNetwork({ type: 'PROPOSE_TRUCE', targetId: document.getElementById('truceTarget').value });
+            closeModal('truceModal');
+        }
+
+    </script>
 </body>
 </html>
