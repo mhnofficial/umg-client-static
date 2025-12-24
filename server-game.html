@@ -11,9 +11,8 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/modals.css">
-    <script src=""
-    
     <style>
+        /* ... (Your existing CSS styles remain here) ... */
         .online-indicator {
             display: inline-block;
             width: 10px;
@@ -408,11 +407,39 @@
             <button class="btn btn-success" onclick="proposeTruce()">Propose Truce</button>
         </div>
     </div>
-
+    
     <script src="js/main.js"></script>
     <script src="js/game-state.js"></script>
     <script src="js/game-core.js"></script> 
 
+    <script>
+        // --- UI Helper Functions (Moved up to define before js/server.js) ---
+        
+        // Add chat message function (needed by js/server.js)
+        window.addChatMessage = function(author, text, isSystem = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg${isSystem ? ' system' : ''}`;
+            msgDiv.innerHTML = isSystem ? 
+                `<div class="chat-text">${text}</div>` :
+                `<div class="chat-author">${author}</div><div class="chat-text">${text}</div>`;
+            
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        // logMessage utility (needed by js/server.js to log connection status)
+        window.logMessage = function(text, type) {
+            // Re-uses addChatMessage for displaying system messages
+            window.addChatMessage('System', text, true);
+        };
+        
+        // updatePlayersList and updateServerInfo need to be attached to window
+        // The definitions for these are left below in the final script block
+    </script>
+    
     <script src="js/server.js"></script>
     
     <script src="js/actions/truce.js"></script>
@@ -456,23 +483,13 @@
         }
         animate();
 
-        // --- UI Helper Functions ---
+        // --- UI Helper Functions (Existing definitions, now safely below server.js load) ---
         
-        // Add chat message function (called by js/game-core.js)
-        function addChatMessage(author, text, isSystem = false) {
-            const chatMessages = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-msg${isSystem ? ' system' : ''}`;
-            msgDiv.innerHTML = isSystem ? 
-                `<div class="chat-text">${text}</div>` :
-                `<div class="chat-author">${author}</div><div class="chat-text">${text}</div>`;
-            
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+        // NOTE: addChatMessage and logMessage were moved up. 
+        // We now define the remaining required window functions here.
 
         // Update players list (called by js/game-core.js)
-        function updatePlayersList(players) {
+        window.updatePlayersList = function(players) {
             const playersList = document.getElementById('playersList');
             
             if (!players || Object.keys(players).length === 0) {
@@ -481,6 +498,7 @@
             }
 
             playersList.innerHTML = Object.values(players).map(player => {
+                // Ensure window.playerID and window.gameState are available (from game-core.js or server.js logic)
                 const isSelf = window.playerID && player.id === window.playerID;
                 const isHost = window.gameState && window.gameState.players && Object.keys(window.gameState.players)[0] === player.id;
                 
@@ -502,14 +520,16 @@
             
             // Populate truce target dropdown with available players (excluding self)
             const truceTargetSelect = document.getElementById('truceTarget');
-            truceTargetSelect.innerHTML = Object.values(players)
-                .filter(p => p.id !== window.playerID)
-                .map(p => `<option value="${p.id}">${p.name}</option>`)
-                .join('');
-        }
+            if (truceTargetSelect && window.playerID) {
+                 truceTargetSelect.innerHTML = Object.values(players)
+                    .filter(p => p.id !== window.playerID)
+                    .map(p => `<option value="${p.id}">${p.name}</option>`)
+                    .join('');
+            }
+        };
 
         // Update server info display (called by js/game-core.js)
-        function updateServerInfo(server) {
+        window.updateServerInfo = function(server) {
             if (!server) return;
             
             document.getElementById('serverName').textContent = server.serverName;
@@ -517,7 +537,7 @@
             document.getElementById('gameSpeed').textContent = server.gameSpeed;
             document.getElementById('playerCount').textContent = 
                 `${server.currentPlayers}/${server.maxPlayers}`;
-        }
+        };
         
         // --- Modal Control ---
         
@@ -539,14 +559,13 @@
             if (window.sendActionToNetwork) { 
                 window.sendActionToNetwork({ type: 'END_TURN' }); 
             } else { 
-                addChatMessage('System', 'Network bridge not fully loaded. Cannot end turn.', true);
+                window.addChatMessage('System', 'Network bridge not fully loaded. Cannot end turn.', true);
             }
         }
         
         function sendGlobalChat() {
             const input = document.getElementById('chatInput');
             if (input.value.trim() && window.sendChatMessageToNetwork) {
-                // Ensure the chat message is sent through the network bridge
                 window.sendChatMessageToNetwork(input.value.trim());
                 input.value = '';
             }
@@ -558,77 +577,69 @@
             const terms = document.getElementById('truceTerms').value;
 
             if (!targetId) {
-                addChatMessage('System', 'ERROR: Please select a player for the truce.', true);
+                window.addChatMessage('System', 'ERROR: Please select a player for the truce.', true);
                 return;
             }
 
-            if (window.sendActionToNetwork) {
+            // Note: This needs window.gameState.players to be defined by game-core.js
+            if (window.sendActionToNetwork && window.gameState && window.gameState.players) {
                 window.sendActionToNetwork({ 
                     type: 'PROPOSE_TRUCE', 
                     targetId: targetId,
                     duration: duration,
                     terms: terms 
                 });
-                addChatMessage('System', `Truce proposed to ${window.gameState.players[targetId].name} for ${duration} turns.`, true);
+                window.addChatMessage('System', `Truce proposed to ${window.gameState.players[targetId].name} for ${duration} turns.`, true);
                 closeModal('truceModal');
             }
         }
 
         function expandLand() {
-            // This would normally open a map-based selection modal, but for a simplified action:
             if (window.sendActionToNetwork) {
                 window.sendActionToNetwork({ type: 'EXPAND_LAND' });
-                addChatMessage('System', 'Expansion initiated. Check the map for new territory claims.', true);
+                window.addChatMessage('System', 'Expansion initiated. Check the map for new territory claims.', true);
             }
         }
 
         // Placeholder handlers for remaining action buttons:
         
         function leaveServer() {
-            // Placeholder: Simply redirects to the server list
             window.location.href = 'server-pick.html'; 
         }
 
         function openInventModal() {
-            // Logic to populate and show technology trees
             openModal('inventModal');
-            addChatMessage('System', 'Invent modal opened. Server needs to implement RESEARCH action.', true);
+            window.addChatMessage('System', 'Invent modal opened. Server needs to implement RESEARCH action.', true);
         }
 
         function openCreateModal() {
-            // Logic to show unit/building creation options
             openModal('createModal');
-            addChatMessage('System', 'Create modal opened. Server needs to implement CREATE action.', true);
+            window.addChatMessage('System', 'Create modal opened. Server needs to implement CREATE action.', true);
         }
 
         function openWarModal() {
-            // Logic to show attack/declare war options
             openModal('warModal');
-            addChatMessage('System', 'War modal opened. Map click should send ATTACK action.', true);
+            window.addChatMessage('System', 'War modal opened. Map click should send ATTACK action.', true);
         }
 
         function openUpgradeModal() {
-            // Logic to show territory/unit upgrade options
             openModal('upgradeModal');
-            addChatMessage('System', 'Upgrade modal opened. Server needs to implement UPGRADE action.', true);
+            window.addChatMessage('System', 'Upgrade modal opened. Server needs to implement UPGRADE action.', true);
         }
 
         function openTasksModal() {
-            // Logic to show in-game tasks/missions
             openModal('tasksModal');
-            addChatMessage('System', 'Tasks modal opened. Server needs to implement TASK_COMPLETE action.', true);
+            window.addChatMessage('System', 'Tasks modal opened. Server needs to implement TASK_COMPLETE action.', true);
         }
 
         function openAllyModal() {
-            // Logic to show alliance proposal options
             openModal('allyModal');
-            addChatMessage('System', 'Ally modal opened. Server needs to implement PROPOSE_ALLY action.', true);
+            window.addChatMessage('System', 'Ally modal opened. Server needs to implement PROPOSE_ALLY action.', true);
         }
 
         function openTradeModal() {
-            // Logic to show resource trade options
             openModal('tradeModal');
-            addChatMessage('System', 'Trade modal opened. Server needs to implement TRADE action.', true);
+            window.addChatMessage('System', 'Trade modal opened. Server needs to implement TRADE action.', true);
         }
     </script>
 </body>
