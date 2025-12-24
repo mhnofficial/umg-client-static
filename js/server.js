@@ -4,7 +4,7 @@
 let socket = null;
 // ⚠️ CRITICAL: Replace with your actual deployed server URL when running online.
 // For local testing, use 'http://localhost:3000' if your Node.js server is running on that port.
-const SERVER_URL = 'http://localhost:3000'; 
+const SERVER_URL = 'https://umg-game-server.onrender.com'; 
 
 // --- 1. CORE CONNECTION ---
 
