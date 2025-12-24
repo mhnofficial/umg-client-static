@@ -1,14 +1,12 @@
 // js/server.js - Client-Side Network Bridge
 
-// 🛑 STEP 1: CRITICALLY IMPORTANT! REPLACE THIS WITH YOUR LIVE RENDER URL!
-// Example: const SERVER_URL = 'https://umg-multiplayer-server.onrender.com';
+// 🛑 STEP 1: CRITICALLY IMPORTANT! This is your live Render URL.
 const SERVER_URL = 'https://umg-game-server.onrender.com'; 
 
 // Initialize Socket.IO connection
+// CRITICAL FIX: Forces the client to use HTTP Polling first to bypass cloud hosting restrictions.
 const socket = io(SERVER_URL, {
     timeout: 10000, 
-    // CRITICAL FIX: Forces the client to use HTTP Polling first. 
-    // This bypasses cloud hosting restrictions on direct WebSockets.
     transports: ['polling'] 
 });
 
@@ -33,6 +31,7 @@ socket.on('connect_error', (err) => {
     const errorReason = err.message || 'Unknown network error.'; 
     console.error("Socket.IO Connection Failed:", err);
     
+    // Uses the function defined in the HTML file's script block
     if (window.addChatMessage) {
         window.addChatMessage('System', `CONNECTION FAILED! Reason: ${errorReason}. Check browser console for details.`, true);
     }
@@ -62,6 +61,7 @@ socket.on('disconnect', (reason) => {
 
 socket.on('connect', () => {
     // 1. Connection to the socket bridge is established.
+    // This relies on window.logMessage being defined in the HTML file before this script runs.
     if (window.logMessage) {
         window.logMessage('Successfully connected to server bridge.', 'system');
     }
@@ -69,8 +69,10 @@ socket.on('connect', () => {
     // 2. Now, try to join the game room using the ID from the URL
     if (serverID) {
         socket.emit('joinServer', initialJoinData);
-        window.logMessage(`Attempting to join server: ${serverID}...`, 'system');
-        
+        if (window.logMessage) {
+             window.logMessage(`Attempting to join server: ${serverID}...`, 'system');
+        }
+       
         const statusEl = document.getElementById('connectionStatus');
         if (statusEl) {
             statusEl.classList.remove('disconnected');
@@ -78,15 +80,22 @@ socket.on('connect', () => {
             statusEl.querySelector('span:last-child').textContent = 'Connected (Joining...)';
         }
     } else {
-        window.logMessage('Connected to server bridge, but no server ID provided in URL.', 'system');
+        if (window.logMessage) {
+            window.logMessage('Connected to server bridge, but no server ID provided in URL.', 'system');
+        }
     }
 });
 
 
 // [1] Initial State from Server (Success)
 socket.on('initialState', (data) => {
-    window.logMessage('Joined server successfully!', 'system');
-    window.handleWelcome(data);
+    if (window.logMessage) {
+        window.logMessage('Joined server successfully!', 'system');
+    }
+    // This relies on window.handleWelcome being defined in js/game-core.js
+    if (window.handleWelcome) {
+        window.handleWelcome(data);
+    }
     
     const statusEl = document.getElementById('connectionStatus');
     if (statusEl) {
@@ -98,11 +107,15 @@ socket.on('initialState', (data) => {
 
 // [2] State Updates
 socket.on('stateUpdate', (newState) => {
-    window.updateGameState(newState);
+    if (window.updateGameState) {
+        window.updateGameState(newState);
+    }
 });
 
 // [3] Global Chat
 socket.on('globalChat', (text, type) => {
+    if (!window.addChatMessage) return;
+
     if (type === 'system' || type === 'error') {
          window.addChatMessage('System', text, true);
     } else {
@@ -115,7 +128,9 @@ socket.on('globalChat', (text, type) => {
 
 // [4] Join Failed
 socket.on('joinFailed', (reason) => {
-    window.logMessage(`Join failed: ${reason}`, 'error');
+    if (window.logMessage) {
+        window.logMessage(`Join failed: ${reason}`, 'error');
+    }
     
     const statusEl = document.getElementById('connectionStatus');
     if (statusEl) {
