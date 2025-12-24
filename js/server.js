@@ -2,12 +2,14 @@
 
 // 🛑 STEP 1: CRITICALLY IMPORTANT! REPLACE THIS WITH YOUR LIVE RENDER URL!
 // Example: const SERVER_URL = 'https://umg-multiplayer-server.onrender.com';
-const SERVER_URL = 'https://umg-game-server.onrender.com'; 
+const SERVER_URL = 'YOUR_RENDER_SERVER_URL_HERE'; 
 
 // Initialize Socket.IO connection
 const socket = io(SERVER_URL, {
-    // Add a small timeout setting for debugging (though not strictly required)
-    timeout: 10000 
+    timeout: 10000, 
+    // CRITICAL FIX: Tell the client to use HTTP Polling first, which is 
+    // less likely to be blocked by cloud hosting proxies than pure WebSockets.
+    transports: ['polling', 'websocket'] 
 });
 
 // --- Utility Functions ---
@@ -17,7 +19,6 @@ function getQueryParam(name) {
 }
 
 const serverID = getQueryParam('server');
-// Use a generic placeholder name for joining since the client will update it later
 const initialJoinData = {
     serverID: serverID,
     password: '', 
@@ -34,7 +35,7 @@ socket.on('connect_error', (err) => {
     
     // Use the global function defined in server-game.html to display the error
     if (window.addChatMessage) {
-        window.addChatMessage('System', `CONNECTION FAILED! Reason: ${errorReason}. Check console for details.`, true);
+        window.addChatMessage('System', `CONNECTION FAILED! Reason: ${errorReason}. Check browser console for details.`, true);
     }
     
     // Update the UI status to show definite failure
@@ -106,7 +107,16 @@ socket.on('stateUpdate', (newState) => {
 
 // [3] Global Chat
 socket.on('globalChat', (text, type) => {
-    window.logMessage(text, type); // Calls function in js/game-core.js
+    // Note: The server sends 'Name: message', so we use addChatMessage which handles formatting
+    if (type === 'system' || type === 'error') {
+         window.addChatMessage('System', text, true);
+    } else {
+        // Find the colon to separate sender from message
+        const parts = text.split(': ', 2);
+        const author = parts[0] || 'Unknown';
+        const message = parts[1] || text;
+        window.addChatMessage(author, message, false);
+    }
 });
 
 // [4] Join Failed
@@ -120,6 +130,19 @@ socket.on('joinFailed', (reason) => {
         statusEl.classList.add('disconnected');
         statusEl.querySelector('span:last-child').textContent = `Join Failed`;
     }
+});
+
+// [5] Server List
+socket.on('serverList', (servers) => {
+    if (window.updateServerListUI) {
+        window.updateServerListUI(servers); // Requires implementation in server-pick.html or a related script
+    }
+});
+
+// [6] Server Created
+socket.on('serverCreated', (newServerID) => {
+    // Redirect to the new game room
+    window.location.href = `server-game.html?server=${newServerID}`;
 });
 
 
