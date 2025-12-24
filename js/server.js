@@ -4,18 +4,13 @@
 // Example: const SERVER_URL = 'https://umg-multiplayer-server.onrender.com';
 const SERVER_URL = 'https://umg-game-server.onrender.com'; 
 
-// js/server.js - Client-Side Network Bridge
-
-// ... (your existing code, including SERVER_URL)
-
 // Initialize Socket.IO connection
 const socket = io(SERVER_URL, {
     timeout: 10000, 
-    // This is the CRITICAL FIX: Forces the client to use HTTP Polling first.
+    // CRITICAL FIX: Forces the client to use HTTP Polling first. 
+    // This bypasses cloud hosting restrictions on direct WebSockets.
     transports: ['polling', 'websocket'] 
 });
-
-// ... (rest of your socket handlers)
 
 // --- Utility Functions ---
 function getQueryParam(name) {
@@ -38,12 +33,10 @@ socket.on('connect_error', (err) => {
     const errorReason = err.message || 'Unknown network error.'; 
     console.error("Socket.IO Connection Failed:", err);
     
-    // Use the global function defined in server-game.html to display the error
     if (window.addChatMessage) {
         window.addChatMessage('System', `CONNECTION FAILED! Reason: ${errorReason}. Check browser console for details.`, true);
     }
     
-    // Update the UI status to show definite failure
     const statusEl = document.getElementById('connectionStatus');
     if (statusEl) {
         statusEl.classList.remove('connected');
@@ -78,7 +71,6 @@ socket.on('connect', () => {
         socket.emit('joinServer', initialJoinData);
         window.logMessage(`Attempting to join server: ${serverID}...`, 'system');
         
-        // Update UI to show tentative connection status
         const statusEl = document.getElementById('connectionStatus');
         if (statusEl) {
             statusEl.classList.remove('disconnected');
@@ -94,9 +86,8 @@ socket.on('connect', () => {
 // [1] Initial State from Server (Success)
 socket.on('initialState', (data) => {
     window.logMessage('Joined server successfully!', 'system');
-    window.handleWelcome(data); // Calls function in js/game-core.js
+    window.handleWelcome(data);
     
-    // Final UI update after successful join
     const statusEl = document.getElementById('connectionStatus');
     if (statusEl) {
         statusEl.classList.remove('disconnected');
@@ -107,16 +98,14 @@ socket.on('initialState', (data) => {
 
 // [2] State Updates
 socket.on('stateUpdate', (newState) => {
-    window.updateGameState(newState); // Calls function in js/game-core.js
+    window.updateGameState(newState);
 });
 
 // [3] Global Chat
 socket.on('globalChat', (text, type) => {
-    // Note: The server sends 'Name: message', so we use addChatMessage which handles formatting
     if (type === 'system' || type === 'error') {
          window.addChatMessage('System', text, true);
     } else {
-        // Find the colon to separate sender from message
         const parts = text.split(': ', 2);
         const author = parts[0] || 'Unknown';
         const message = parts[1] || text;
@@ -128,7 +117,6 @@ socket.on('globalChat', (text, type) => {
 socket.on('joinFailed', (reason) => {
     window.logMessage(`Join failed: ${reason}`, 'error');
     
-    // Set UI back to disconnected state
     const statusEl = document.getElementById('connectionStatus');
     if (statusEl) {
         statusEl.classList.remove('connected');
@@ -140,13 +128,12 @@ socket.on('joinFailed', (reason) => {
 // [5] Server List
 socket.on('serverList', (servers) => {
     if (window.updateServerListUI) {
-        window.updateServerListUI(servers); // Requires implementation in server-pick.html or a related script
+        window.updateServerListUI(servers);
     }
 });
 
 // [6] Server Created
 socket.on('serverCreated', (newServerID) => {
-    // Redirect to the new game room
     window.location.href = `server-game.html?server=${newServerID}`;
 });
 
