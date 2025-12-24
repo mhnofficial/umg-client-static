@@ -4,13 +4,18 @@
 // Example: const SERVER_URL = 'https://umg-multiplayer-server.onrender.com';
 const SERVER_URL = 'https://umg-game-server.onrender.com'; 
 
+// js/server.js - Client-Side Network Bridge
+
+// ... (your existing code, including SERVER_URL)
+
 // Initialize Socket.IO connection
 const socket = io(SERVER_URL, {
     timeout: 10000, 
-    // CRITICAL FIX: Tell the client to use HTTP Polling first, which is 
-    // less likely to be blocked by cloud hosting proxies than pure WebSockets.
+    // This is the CRITICAL FIX: Forces the client to use HTTP Polling first.
     transports: ['polling', 'websocket'] 
 });
+
+// ... (rest of your socket handlers)
 
 // --- Utility Functions ---
 function getQueryParam(name) {
